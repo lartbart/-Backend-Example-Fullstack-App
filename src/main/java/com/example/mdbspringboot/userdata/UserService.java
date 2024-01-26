@@ -30,8 +30,7 @@ public class UserService {
         Optional<UserModel> foundUser = users.stream().filter(user -> user.getUsername().equals(userDTO.username())).findFirst();
         if (foundUser.isPresent()) {
             return foundUser.filter(userModel -> passwordEncoder.matches(userDTO.password(), userModel.getPassword())).isPresent();
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -40,8 +39,38 @@ public class UserService {
         return jwtTokenProvider.createToken(userDTO.username());
     }
 
-    public void Register(UserRegisterDTO userDTO) {
-        UserModel userModel = new UserModel(userDTO.username(), userDTO.email(), passwordEncoder.encode(userDTO.password()));
-        userRepository.insert(userModel);
+    public ResponseEntity<String> Register(UserRegisterDTO userDTO) {
+        if (userRepository.existsByUsername(userDTO.username())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
+        } else {
+            UserModel userModel = new UserModel(userDTO.username(), userDTO.email(), passwordEncoder.encode(userDTO.password()));
+            userRepository.insert(userModel);
+            return ResponseEntity.ok("");
+        }
+    }
+
+    public void UpdateData(String username, UserUpdateDTO data) {
+        UserModel user = userRepository.findByUsername(username);
+
+        if (data.username() != null && !userRepository.existsByUsername(data.username())) {
+            user.setUsername(data.username());
+        }
+        if (userRepository.existsByUsername(data.username())) {
+            throw new Error();
+        }
+        if (data.password() != null) {
+            user.setPassword(passwordEncoder.encode(data.password()));
+        }
+        if (data.email() != null) {
+            user.setEmail(data.email());
+        }
+        userRepository.save(user);
+    }
+
+
+    public void DeleteData(String username) {
+        UserModel user = userRepository.findByUsername(username);
+        userRepository.delete(user);
     }
 }
+

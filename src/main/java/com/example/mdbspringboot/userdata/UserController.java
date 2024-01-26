@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("api/users")
 public class UserController {
@@ -32,7 +33,21 @@ public class UserController {
 
     @CrossOrigin
     @PostMapping("/register")
-    public void register(@RequestBody UserRegisterDTO userDto) {
-        userService.Register(userDto);
+    public ResponseEntity<String> register(@RequestBody UserRegisterDTO userDto) {
+        return userService.Register(userDto);
+    }
+
+    @CrossOrigin
+    @PatchMapping("/update/{username}")
+    public ResponseEntity<String> updateUserData(@PathVariable String username, @RequestBody UserUpdateDTO data) {
+        userService.UpdateData(username, data);
+        return ResponseEntity.ok("");
+    }
+
+    @CrossOrigin
+    @DeleteMapping("/delete/{username}")
+    public ResponseEntity<String> deleteUserData(@PathVariable String username) {
+        userService.DeleteData(username);
+        return ResponseEntity.ok("");
     }
 }
